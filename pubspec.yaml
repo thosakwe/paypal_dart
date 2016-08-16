@@ -2,7 +2,7 @@ name: paypal_rest_api
 description: Unofficial Dart bindings for the PayPal REST API.
 version: 1.0.0-dev
 author: Tobe O <thosakwe@gmail.com>
-homepage: https://github.com/thosakwe/paypal_rest_api_dart
+homepage: https://github.com/thosakwe/paypal_dart
 dependencies:
   http: ">=0.11.3 <0.12.0"
 dev_dependencies:
