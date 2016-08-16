@@ -50,7 +50,7 @@ class PayPalClient extends BaseClient {
   /// Asynchronously obtains an access token from the PayPal API.
   Future<PayPalAccessCredentials> obtainAccessCredentials() async {
     var authString = BASE64.encode("$clientId:$clientSecret".codeUnits);
-    var response = await post("$paypalEndpoint/oauth2/token",
+    var response = await _inner.post("$paypalEndpoint/$apiVersion/oauth2/token",
         body: "grant_type=client_credentials",
         headers: {
           "Accept": "application/json",

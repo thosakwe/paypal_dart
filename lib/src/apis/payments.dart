@@ -24,11 +24,13 @@ class Payment {
   this.createTime,
   this.updateTime,
   this.redirectUrls,
-  this.transactions}) {
+  this.transactions,
+  payer}) {
     this.createTime = createTime ?? new DateTime.now();
     this.links = links ?? [];
     this.transactions = transactions ?? [];
     this.redirectUrls = redirectUrls ?? {};
+    this.payer = payer ?? {};
   }
 
   Payment.fromJson(String json) {
@@ -105,6 +107,10 @@ class Payer {
   String paymentMethod;
   List fundingInstruments = [];
 
+  Payer({this.paymentMethod, List fundingInstruments}) {
+    this.fundingInstruments = fundingInstruments ?? [];
+  }
+
   Map toJson() {
     return {
       "payment_method": paymentMethod,
@@ -128,7 +134,7 @@ class PaymentsApi {
 
   /// Creates a [Payment].
   Future<Payment> createPayment(payment) async {
-    var response = await _client.post("$_endPoint",
+    var response = await _client.post("$_endPoint/payment",
         body: JSON.encode(payment is Payment ? payment.toJson() : payment),
         headers: {
           "Accept": "application/json",
