@@ -6,6 +6,7 @@ import "dart:convert";
 import "package:http/src/base_client.dart";
 import "package:http/src/base_request.dart";
 import "package:http/src/streamed_response.dart";
+import "package:http/src/request.dart";
 import "package:http/src/response.dart";
 import "src/access_credentials.dart";
 import "src/paypal_exception.dart";
@@ -16,10 +17,13 @@ class PayPalClient extends BaseClient {
   PayPalAccessCredentials credentials;
   BaseClient _inner;
   DateTime _lastTokenTime;
+  final RegExp _leadingSlashes = new RegExp(r"^/+");
+  bool debug;
 
   PayPalClient(this._inner, this.clientId, this.clientSecret,
       {String this.apiVersion: "v1",
-      String this.paypalEndpoint: "https://api.paypal.com"}) {
+      String this.paypalEndpoint: "https://api.paypal.com",
+      bool this.debug: false}) {
     this.paypalEndpoint = paypalEndpoint.replaceAll(new RegExp(r"/+$"), "");
   }
 
@@ -28,7 +32,8 @@ class PayPalClient extends BaseClient {
     _lastTokenTime = new DateTime.now();
   }
 
-  String _makeUrl(url) => "$paypalEndpoint/$apiVersion/$url";
+  String _makeUrl(String url) =>
+      "$paypalEndpoint/$apiVersion/${url.replaceAll(_leadingSlashes, "")}";
 
   /*
    * The Authorization field is constructed as follows:[7][8][9]
@@ -71,15 +76,37 @@ class PayPalClient extends BaseClient {
       await _fetchToken();
 
     if (credentials != null) {
-      request.headers["Authorization"] = "Bearer ${credentials.accessToken}";
+      request.headers["authorization"] = "Bearer ${credentials.accessToken}";
+    } else if (credentials == null) {
+      var provisional = await obtainAccessCredentials();
+      request.headers["authorization"] = "Bearer ${provisional.accessToken}";
+      request.headers["dart_paypal_client"] = "provisional";
+      credentials = provisional;
+      await _fetchToken();
+    }
+
+    if (debug) {
+      print("Sending ${request.method} to ${request.url}");
+      print("Headers: ${request.headers}");
+
+      if (request is Request) {
+        print("Body: ${request.body}");
+      }
     }
 
     var response = await _inner.send(request);
 
     if (response.statusCode != 200 && response.statusCode != 201) {
       var out = await Response.fromStream(response);
-      throw new PayPalException.fromJson(out.body, statusCode: response.statusCode);
-    } else return response;
+
+      if (debug) {
+        print("Error response text: ${out.body}");
+      }
+
+      throw new PayPalException.fromJson(out.body,
+          statusCode: response.statusCode);
+    } else
+      return response;
   }
 
   @override
@@ -123,6 +150,4 @@ class PayPalClient extends BaseClient {
     _inner.close();
     return super.close();
   }
-
-
 }

@@ -80,6 +80,7 @@ class Payment {
       "experience_profile_id": experienceProfileId,
       "note_to_payer": noteToPayer,
       "failure_reason": failureReason,
+      "redirect_urls": redirectUrls,
       "payer": payer is Payer ? payer.toJson() : payer
     };
 

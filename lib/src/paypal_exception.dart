@@ -5,11 +5,12 @@ import "dart:convert";
 
 /// Represents an error while using the PayPal API.
 class PayPalException implements Exception {
-  String details, informationLink, message, name;
+  List details;
+  String informationLink, message, name;
   int statusCode;
 
   PayPalException(
-      {String this.details,
+      {List this.details,
       String this.informationLink,
       String this.message,
       String this.name,
