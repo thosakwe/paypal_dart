@@ -1,3 +1,6 @@
+# ARCHIVED
+https://github.com/thosakwe/paypal_dart/issues/3#issuecomment-540569871
+
 # paypal_rest_api
 
 ![version 1.0.0-dev](https://img.shields.io/badge/version-1.0.0--dev-red.svg)
